@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="UTF-8">
+	<meta name="author" content="https://github.com/zuzhi">
+	<title>idcardGenerator</title>
+	<link rel="stylesheet" href="./css/bootstrap.min.css">
+    <!--
+	<script type="text/javascript" src="./js/jquery.min.js"></script>
+	<script type="text/javascript" src="./js/bootstrap.min.js"></script>
+    -->
+	<script type="text/javascript" src="./js/clipboard.min.js"></script>
+<style>
+	.page-header {
+		border-bottom: 1px solid #000;
+	}
+	.tooltip-inner {
+		max-width: 90px;
+		/* If max-width does not work, try using width instead */
+		width: 90px;
+	}
+	li {
+		max-width: 90px;
+		/* If max-width does not work, try using width instead */
+		width: 90px;
+	}
+</style>
+</head>
+<body onload="fnOnLoad()">
+<div class="container alert alert-info col-sm-12">
+	<div class="col-sm-offset-3 col-sm-6">
+		<div class="page-header">
+			<h1 class="text-center">idcardGenerator</h1>
+			<p class="text-center"><strong>身份证号生成器</strong> <span class="label label-primary">v1.5.1</span></p>
+		</div>
+		<p><strong style="color:red">仅供测试使用，切勿用于非法活动，否则后果自负！</strong></p>
+		<p>提示[Q] <span id="spanUnfold" class="glyphicon glyphicon-menu-right" onclick="fnUnfold()"></span><span id="spanFold" style="display: none" class="glyphicon glyphicon-menu-down" onclick="fnFold()"></span><br></p>
+		<div id="info" style="display: none">
+			<p class="bg-info"><strong>浏览器支持：</strong><br></p>
+			<ul class="list-inline">
+				<li>
+					<img src="./image/chrome.png" height="32" width="32" alt="Chrome logo">
+					<p>Chrome 42+</p>
+				</li>
+				<li>
+					<img src="./image/firefox.png" height="32" width="32" alt="Firefox logo">
+					<p>Firefox 41+</p>
+				</li>
+				<li>
+					<img src="./image/ie.png" height="32" width="32" alt="IE logo">
+					<p>IE 9+</p>
+				</li>
+				<li>
+					<img src="./image/safari.png" height="32" width="32" alt="Safari logo">
+					<p>Safari ✘</p>
+				</li>
+			</ul>
+			<p class="bg-info"><strong>可用的快捷键：</strong><br></p>
+			<dl class="dl-horizontal">
+				<dt><kbd>alt + g</kbd></dt>
+				<dd>根据页面选中的各参数生成身份证号，即【生成】</dd>
+				<dt><kbd>alt + r</kbd></dt>
+				<dd>根据页面上所有值随机生成身份证号，即【随机生成】</dd>
+				<dt><kbd>alt + q</kbd></dt>
+				<dd>显示/隐藏提示</dd>
+			</dl>
+		</div>
+	</div>
+</div>
+<div class="container">
+	<form class="form-horizontal">
+		<div class="form-group">
+			<label for="province" class="col-sm-2 control-label">地区</label>
+			<div class="col-sm-3">
+				<select name="省" id="province" class="form-control"></select>
+			</div>
+			<div class="col-sm-3">
+				<select name="市、州" id="region" class="form-control" onchange="fnChangeRegion()"></select>
+			</div>
+			<div class="col-sm-3">
+				<select name="区、县" id="county" class="form-control"></select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="year" class="col-sm-2 control-label">出生日期</label>
+			<div class="col-sm-3">
+				<select name="年" id="year" class="form-control" onchange="fnChangeYearOrMonth()"></select>
+			</div>
+			<div class="col-sm-3">
+				<select name="月" id="month" class="form-control" onchange="fnChangeYearOrMonth()"></select>
+			</div>
+			<div class="col-sm-3">
+				<select name="日" id="day" class="form-control"></select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="male" class="col-sm-2 control-label">性别</label>
+			<div class="col-sm-6">
+				<label class="radio-inline">
+					<input type="radio" name="gender" id="male" value="1" checked="checked"> 男
+				</label>
+				<label class="radio-inline">
+					<input type="radio" name="gender" id="female" value="0"> 女
+				</label>
+			</div>
+		</div>
+		<div class="form-group hidden">
+			<div class="col-sm-offset-3 col-sm-3">
+				<input class="btn btn-primary" type="button" name="submit" value="生成" onclick="fnGenerate()"> <strong>Or</strong> 
+				<input class="btn btn-success" type="button" name="submit" value="随机生成" onclick="fnGenerateRandom()">
+			</div>
+		</div>
+		<br>
+		<div class="form-group">
+			<div class="col-sm-offset-3 col-sm-7">
+				<div class="input-group">
+					<span class="input-group-btn">
+						<!-- Split button -->
+						<button type="button" class="btn btn-success" onclick="fnGenerate()">生成[G]</button>
+						<button type="button" class="btn btn-default" disabled="disabled" id="btnOR"><strong>OR</strong></button>
+						<button type="button" class="btn btn-success" onclick="fnGenerateRandom()">随机生成[R]</button>
+						<!-- <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							<span class="caret"></span>
+							<span class="sr-only">Toggle Dropdown</span>
+						</button>
+						<ul class="dropdown-menu">
+							<li><a href="" onclick="fnGenerateRandom()">随机生成</a></li>
+						</ul> -->
+					</span>
+					<input type="text" class="form-control" id="id-holder" placeholder="idcard...">
+					<span class="input-group-btn">
+						<button id="icon-btnCopy" class="btn btn-default" type="button" data-toggle="tooltip" data-placement="bottom" title="复制到剪贴板" data-clipboard-target="#id-holder"><span class="glyphicon glyphicon-copy"></span></button>
+                        <button id="icon-btnReverse" class="btn btn-default" type="button" data-toggle="tooltip" data-placement="bottom" title="反向查询"><span class="glyphicon glyphicon-chevron-left"></span></button>
+					</span>
+				</div>
+				<h3 id="holder" class="text-center"></h3>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="col-sm-offset-4 col-sm-4">
+				<input class="btn btn-default center-block" type="button" id="btnCopy" name="copy" value="复制" style="display: none">
+			</div>
+		</div>
+	</form>
+</div>
+
+<script>
+	// 定义全局变量provinceArray,regionArray和countyArray
+	var provinceArray = ["530000", "云南省"];
+	var regionArray = ["530100", "昆明市", "530300", "曲靖市", "530400", "玉溪市", "530500", "保山市", "530600", "昭通市", "530700", "丽江市", "530800", "普洱市", "530900", "临沧市", "532300", "楚雄彝族自治州", "532500", "红河哈尼族彝族自治州", "532600", "文山壮族苗族自治州", "532800", "西双版纳傣族自治州", "532900", "大理白族自治州", "533100", "德宏傣族景颇族自治州", "533300", "怒江傈僳族自治州", "533400", "迪庆藏族自治州"];
+	var countyArray = [["530101","市辖区","530102","五华区","530103","盘龙区","530111","官渡区","530112","西山区","530113","东川区","530114","呈贡区","530122","晋宁县","530124","富民县","530125","宜良县","530126","石林彝族自治县","530127","嵩明县","530128","禄劝彝族苗族自治县","530129","寻甸回族彝族自治县","530181","安宁市"],["530301","市辖区","530302","麒麟区","530321","马龙县","530322","陆良县","530323","师宗县","530324","罗平县","530325","富源县","530326","会泽县","530328","沾益县","530381","宣威市"],["530401","市辖区","530402","红塔区","530421","江川县","530422","澄江县","530423","通海县","530424","华宁县","530425","易门县","530426","峨山彝族自治县","530427","新平彝族傣族自治县","530428","元江哈尼族彝族傣族自治县"],["530501","市辖区","530502","隆阳区","530521","施甸县","530522","腾冲县","530523","龙陵县","530524","昌宁县"],["530601","市辖区","530602","昭阳区","530621","鲁甸县","530622","巧家县","530623","盐津县","530624","大关县","530625","永善县","530626","绥江县","530627","镇雄县","530628","彝良县","530629","威信县","530630","水富县"],["530701","市辖区","530702","古城区","530721","玉龙纳西族自治县","530722","永胜县","530723","华坪县","530724","宁蒗彝族自治县"],["530801","市辖区","530802","思茅区","530821","宁洱哈尼族彝族自治县","530822","墨江哈尼族自治县","530823","景东彝族自治县","530824","景谷傣族彝族自治县","530825","镇沅彝族哈尼族拉祜族自治县","530826","江城哈尼族彝族自治县","530827","孟连傣族拉祜族佤族自治县","530828","澜沧拉祜族自治县","530829","西盟佤族自治县"],["530901","市辖区","530902","临翔区","530921","凤庆县","530922","云县","530923","永德县","530924","镇康县","530925","双江拉祜族佤族布朗族傣族自治县","530926","耿马傣族佤族自治县","530927","沧源佤族自治县"],["532301","楚雄市","532322","双柏县","532323","牟定县","532324","南华县","532325","姚安县","532326","大姚县","532327","永仁县","532328","元谋县","532329","武定县","532331","禄丰县"],["532501","个旧市","532502","开远市","532503","蒙自市","532504","弥勒市","532523","屏边苗族自治县","532524","建水县","532525","石屏县","532527","泸西县","532528","元阳县","532529","红河县","532530","金平苗族瑶族傣族自治县","532531","绿春县","532532","河口瑶族自治县"],["532601","文山市","532622","砚山县","532623","西畴县","532624","麻栗坡县","532625","马关县","532626","丘北县","532627","广南县","532628","富宁县"],["532801","景洪市","532822","勐海县","532823","勐腊县"],["532901","大理市","532922","漾濞彝族自治县","532923","祥云县","532924","宾川县","532925","弥渡县","532926","南涧彝族自治县","532927","巍山彝族回族自治县","532928","永平县","532929","云龙县","532930","洱源县","532931","剑川县","532932","鹤庆县"],["533102","瑞丽市","533103","芒市","533122","梁河县","533123","盈江县","533124","陇川县"],["533321","泸水县","533323","福贡县","533324","贡山独龙族怒族自治县","533325","兰坪白族普米族自治县"],["533421","香格里拉县","533422","德钦县","533423","维西傈僳族自治县"]];
+
+	// 页面载入时执行
+	function fnOnLoad() {
+        window.$ = window.jQuery = require('./js/jquery.min.js');
+		require('./js/bootstrap.min.js');
+		//require('./js/clipboard.min.js');
+		// 初始化各个select的option
+		// TODO 动态生成行政区划Select
+		// province
+		var province = document.getElementById('province'); // select对象，province
+		for (var i = 0; i < provinceArray.length; i++) {
+			province.add(new Option(provinceArray[i+1], provinceArray[i]));
+			i++;
+		}
+
+		// region
+		var region = document.getElementById('region'); // select对象，region
+		for (var i = 0; i < regionArray.length; i++) {
+			region.add(new Option(regionArray[i+1], regionArray[i]));
+			i++;
+		}
+
+		// county
+		var county = document.getElementById('county'); // select对象，county
+		for (var i = 0; i < countyArray[0].length; i++) {
+			county.add(new Option(countyArray[0][i+1], countyArray[0][i]));
+			i++;
+		}
+
+		// 动态生成日期（年月日）
+		// year
+		var year = document.getElementById('year');   // select对象，year
+		for (var i = 2016; i >= 1916; i--) {
+			year.add(new Option(i, i)); // 添加option
+		}
+		// month
+		var month = document.getElementById('month'); // select对象，month
+		for (var i = 1; i <= 12; i++) {
+			month.add(new Option(padLeft(i.toString(), 2), i)); // 添加option
+		}
+
+		// day
+		/*
+		var day = document.getElementById('day');    // select对象，day
+		for (var i = 1; i <= 31; i++) {
+			day.add(new Option(padLeft(i.toString(), 2), i)); // 添加option
+		}*/
+		fnChangeYearOrMonth(); // 调用该方法设置day的选项
+
+		// 添加快捷键事件触发生成按钮（彩蛋1）
+		document.onkeydown = function() { // onkeydown事件
+			console.log("keyCode: " + event.keyCode);
+			if (event.keyCode == 71 && event.altKey) { // alt + g
+				fnGenerate(); // 生成ID
+			} else if (event.keyCode == 82 && event.altKey) { // alt + r
+				fnGenerateRandom(); // 随机生成ID
+			} else if (event.keyCode == 81 && event.altKey) { // alt + q
+				if (document.getElementById('info').style.display == "none") {
+					fnUnfold();
+				} else {
+					fnFold();
+				}
+			}
+		};
+
+		// initialize tooltips
+		$(function () {
+			$('[data-toggle="tooltip"]').tooltip();
+		});
+
+		// 改变btnOR的cursor样式为默认
+		document.getElementById('btnOR').style.cursor = "default";
+
+		// initialize copy to clipboard event
+		var clipboard = new Clipboard('#icon-btnCopy');
+
+		clipboard.on('success', function(e) {
+			// console.info('Action:', e.action);
+			// console.info('Text:', e.text);
+			// console.info('Trigger:', e.trigger);
+			e.clearSelection();
+			// TODO 修改tooltip
+			/*$('#icon-btnCopy').data('bs.tooltip', false)		// Delete the tooltip
+							  .tooltip({title: 'new text'})
+							  .tooltip('show');*/
+            // 更新tooltip的title
+            // $('#icon-btnCopy').tooltip('hide')
+            //                   .attr('data-original-title', '复制成功')
+            //                   .tooltip('fixTitle')
+            //                   .tooltip('show');
+            // 还原tooltip的title
+            // $('#icon-btnCopy').attr('data-original-title', '复制到剪贴板')
+            //                   .tooltip('fixTitle');
+            
+            // 直接更新tooltip的title，无需隐藏再显示
+            $('#icon-btnCopy').attr('title', '复制到剪贴板')
+                              .tooltip('fixTitle')
+                              .data('bs.tooltip')
+                              .$tip.find('.tooltip-inner')
+                              .text('复制成功');
+            console.log("clipboard: copied");
+		});
+
+		clipboard.on('error', function(e) {
+			// console.error('Action:', e.action);
+			// console.error('Trigger:', e.trigger);
+		});
+
+		fnGenerateRandom(); // 页面加载时，调用该方法随机生成一个身份证号
+
+		// 隐藏提示和向下箭头
+		//$('#spanFold').hide();
+		//$('#info').hide();
+	}
+
+	// 州市select框onchange事件
+	function fnChangeRegion() {
+		var region = document.getElementById('region'); // select对象，region
+		var index_region = region.selectedIndex; // 选中索引
+		var value_region = region.options[index_region].value; // 选中值
+		var text_region = region.options[index_region].text;   // 选中文本
+		var county = document.getElementById('county'); // select对象，county
+		county.options.length = 0; // 删除所有选项option
+		// 设置区县select
+		for (var index in regionArray) { // 遍历regionArray
+			if (regionArray[index] == value_region) { // 获取到选中的地区
+				index = index / 2; // 计算在countyArray中的序号
+				console.log("index(region): " + index);
+				for (var i = 0; i < countyArray[index].length; i++) { // 设置county的option
+					county.add(new Option(countyArray[index][i+1], countyArray[index][i]));
+					i++;
+				}
+			}
+		}
+	}
+
+	// 年份、月份select框onchange事件
+	function fnChangeYearOrMonth() {
+		var year = document.getElementById('year'); // select对象，year
+		var index_year = year.selectedIndex; // 选中索引
+		var value_year = year.options[index_year].value; // 选中值（年份）
+
+		var month = document.getElementById('month'); // select对象，month
+		var index_month = month.selectedIndex; // 选中索引
+		var value_month = month.options[index_month].value; // 选中值（月份）
+		// var text_month = month.options[index_month].text;   // 选中文本
+		
+		var day = document.getElementById('day'); // select对象，day
+		day.options.length = 0; // 删除所有选项option
+		// 设置号数select
+		console.log("daysOf(" + value_year + ", " + value_month +"): " + daysOf(value_year, value_month));
+		for (var i = 1; i <= daysOf(value_year, value_month); i++) {
+			day.add(new Option(padLeft(i.toString(), 2), i)); // 添加option
+		}
+	}
+
+	// 计算指定年指定月份的天数
+	// [return 28 + (month + Math.floor(month/8)) % 2 + 2 % month + 2 * Math.floor(1/month)] - 计算天数的算法（2月以28计）
+	// [return (year%400===0 || (year%4===0 && year%100!==0))?1:0] - 计算闰年
+	// 注：对于数值很大的年份计算闰年的算法并不完全准确，能整除3200并且能整除172800的年份也是闰年，如：172800年是闰年，86400年不是闰年。但是这里就不做判断了，毕竟不会用到
+	// function daysOf(year, month) {
+	// 	return (28 + (month + Math.floor(month/8)) % 2 + 2 % month + 2 * Math.floor(1/month)) + (((year%400===0 || (year%4===0 && year%100!==0)) && month==2)?1:0);
+	// }
+	function daysOf(year, month) {
+		var daysArray = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+		if (year%400===0 || (year%4===0 && year%100!==0)) {
+			daysArray[1] = 29;
+		}
+		return daysArray[month - 1];
+	}
+
+	// 不足位前面加0，用于月、日前加0
+	function padLeft(str, length) {
+		if (str.length >= length)
+			return str;
+		else
+			return padLeft("0" + str, length);
+	}
+
+	// 获取性别radio选中值
+	function getGender(name){
+	    var gender = document.getElementsByName(name);
+	    if(gender !== null){
+	        for(var i = 0; i < gender.length; i++){
+	            if(gender[i].checked){
+	                return gender[i].value;
+	            }
+	        }
+	    }
+	    return null;
+	}
+
+	// 获取指定范围内随机整数
+	function getNumberWithin(min, max) {
+		return Math.round((Math.random()*(max - min) + min));
+	}
+
+	// 根据前17位计算并不全第18位身份证号
+	function pre17to18(pre17) {
+		console.log("pre17: " + pre17);
+		var digit, coefficient, sum = 0; // 位值，系数，和；和要给初始值0
+		for (var i = 1; i <= 17; i++) {
+			digit = Number(pre17.substr((i - 1), 1));
+			coefficient = Math.pow(2, 18 - i) % 11;
+			sum += digit * coefficient;
+			console.log("digit: " + digit + ", coefficient: " + coefficient + ", product: " + (digit * coefficient));
+		}
+		console.log("sum: " + sum);
+		var mod = sum % 11;
+		console.log("mod(sum % 11): " + mod);
+		var verifyCode; // 校验码
+		switch (mod) {
+			case 0:
+				verifyCode = '1';
+				break;
+			case 1:
+				verifyCode = '0';
+				break;
+			case 2:
+				verifyCode = 'X';
+				break;
+			case 3:
+				verifyCode = '9';
+				break;
+			case 4:
+				verifyCode = '8';
+				break;
+			case 5:
+				verifyCode = '7';
+				break;
+			case 6:
+				verifyCode = '6';
+				break;
+			case 7:
+				verifyCode = '5';
+				break;
+			case 8:
+				verifyCode = '4';
+				break;
+			case 9:
+				verifyCode = '3';
+				break;
+			case 10:
+				verifyCode = '2';
+				break;
+		}
+		console.log("verifyCode: " + verifyCode);
+		var idcard = pre17 + verifyCode;
+		console.log("idcard: " + idcard);
+
+		return idcard;
+	}
+
+	// 对身份证号进行逆向解析，设置对应的参数
+	function reverseIDCard(idcard) {
+		var divisionCode = idcard.slice(0, 6);
+		var birthDateCode = idcard.slice(6, 14);
+		var year = birthDateCode.slice(0, 4);
+		var month = birthDateCode.slice(4, 6);
+		var day = birthDateCode.slice(6, 8);
+		var gender = idcard.slice(16, 17);
+		console.log("divisionCode: " + divisionCode + " | birthDateCode: " + birthDateCode + " | year: " + year + " | month: " + month + " | day: " + day + " | genderCode: " + gender);
+		for (var i = 0; i < countyArray.length; i++) { // 逆向设置地区
+			for (var j = 0; j < countyArray[i].length; j++) {
+				if (divisionCode == countyArray[i][j]) {
+					console.log("regionCode: " + regionArray[i*2] + " | regionName: " + regionArray[i*2+1] + " | countyCode: " + countyArray[i][j] + " | countyName: " + countyArray[i][j+1]);
+					document.getElementById('region').options[i].selected = true; // 设置对应的region被选中
+					fnChangeRegion(); // 调用该方法设置county的选项
+					document.getElementById('county').options[j/2].selected = true; // 设置对应的county被选中
+				}
+			}
+		}
+		// 逆向设置年月日
+		var yearSelect = document.getElementById('year');
+		for (var i = 0; i < yearSelect.length; i++) {
+			if (year == yearSelect[i].value) {
+				yearSelect.options[i].selected = true; // 设置对应year被选中
+			}
+		}
+		var monthSelect = document.getElementById('month');
+		for (var i = 0; i < monthSelect.length; i++) {
+			if (Number(month) == monthSelect[i].value) {
+				console.log("i: " + i + " | monthSelect[i].value: " + monthSelect[i].value);
+				monthSelect.options[i].selected = true; // 设置对应month被选中
+			}
+		}
+		fnChangeYearOrMonth(); // 调用该方法设置day的选项
+		var daySelect = document.getElementById('day');
+		for (var i = 0; i < daySelect.length; i++) {
+			if (Number(day) == daySelect[i].value) {
+				daySelect.options[i].selected = true; // 设置对应day被选中
+			}
+		}
+		// 逆向设置性别
+		var genderRadio = document.getElementsByName('gender');
+		if (gender % 2 === 0) { // 女
+			genderRadio[1].checked = true;
+		} else { // 男
+			genderRadio[0].checked = true;
+		}
+	}
+
+	// 复制idcard到剪贴板
+	function copyToClipboard(idcard) {
+		//document.getElementById('holder').innerHTML = idcard; // 将idcard放到页面上
+		//document.getElementById('btnCopy').style.display = "block"; // 显示复制按钮
+		//document.getElementById('id-holder').value = idcard;
+
+		if (navigator.userAgent.indexOf("Chrome") > -1) { // Chrome
+			//fnCopy(); // 执行复制操作，复制idcard到剪贴板
+  			return;
+  		}
+  		// 其他浏览器
+		window.clipboardData.setData('Text', idcard); // 将idcard放到剪贴板中（彩蛋2，仅在IE下有效）
+	}
+
+	// 根据页面上输入的值生成IDCARD
+	function fnGenerate() {
+		// 1. 获取行政区划码（6位）
+		var divisionCode = document.getElementById('county').value;
+		console.log("divisionCode: " + divisionCode);
+
+		// 2. 获取出生日期码（8位）
+		var birthDateCode = document.getElementById('year').value +
+						padLeft(document.getElementById('month').value, 2) +
+						padLeft(document.getElementById('day').value, 2);
+		console.log("birthDateCode: " + birthDateCode);
+
+		// 3. 获取性别，生成顺序码（3位）。二者进行比较并筛选，奇数为男，偶数为女
+		var gender = getGender("gender"); // 获取性别（1:男，2:女，null:没有选）
+		console.log("gender: " + gender);
+		var sequenceCode;
+		while (true) {
+			sequenceCode = getNumberWithin(0, 999); // 随机获取0-999之间的一个数作为顺序码
+			console.log(sequenceCode);
+			if (gender % 2 == sequenceCode % 2) break; // 生成的顺序码同为奇数或同为偶数则跳出循环（null%2等于0）
+		}
+		sequenceCode = padLeft(sequenceCode.toString(), 3); // 转换为顺序码字符串
+		console.log("sequenceCode: " + sequenceCode);
+
+		// 4. 拼接前17位，生成校验码（1位），完成18位身份证号码
+		// 4.0.拼接前17位
+		// 4.1.将前17位数分别乘以不同的系数（系统JS表达：Math.pow(2, 18 - index) % 11）（index取1到17），
+		//     从第1位到第17位的系数分别为：7 9 10 5 8 4 2 1 6 3 7 9 10 5 8 4 2
+		// 4.2.将这17位数字和系数相乘的结果相加
+		// 4.3.用加出来和除以11，看余数是多少
+		// 4.4.余数只可能有0 1 2 3 4 5 6 7 8 9 10这11个数字，其分别对应的最后一位身
+		//     份证的号码为1 0 X 9 8 7 6 5 4 3 2
+		// 4.5.通过上面得知如果余数是2，就会在身份证的第18位数字上出现罗马数字的Ⅹ。如果余数是10，身份证的最后一位号码就是2
+		var pre17 = divisionCode + birthDateCode + sequenceCode;
+		var idcard = pre17to18(pre17); // 调用第18位补齐方法完成身份证号生成
+
+		document.getElementById('id-holder').value = idcard; // 将idcard放到页面上
+		copyToClipboard(idcard); // 复制idcard到剪贴板
+	}
+
+	// 随机生成IDCARD
+	function fnGenerateRandom() {
+		// 1. 行政区划码（6位）
+		var x = getNumberWithin(0, (countyArray.length-1));
+		var y;
+		while (true) {
+			y = getNumberWithin(0, countyArray[x].length-1);
+			if (y % 2 === 0) break;
+		}
+		var divisionCode = countyArray[x][y];
+		console.log("random divisionCode: " + divisionCode);
+
+		// 2. 出生日期码（8位）
+		var year = getNumberWithin(1916, 2016).toString();
+		var month =  padLeft(getNumberWithin(1, 12).toString(), 2);
+		var day = padLeft(getNumberWithin(1, daysOf(Number(year), Number(month))).toString(), 2);
+		var birthDateCode = year + month + day;
+		console.log("random birthDateCode: " + birthDateCode);
+
+		// 3. 顺序码
+		var sequenceCode = padLeft(getNumberWithin(0, 999).toString(), 3);
+		console.log("random sequenceCode: " + sequenceCode);
+
+		// 4. 拼接前17位，生成校验码（1位），完成18位身份证号码
+		var pre17 = divisionCode + birthDateCode + sequenceCode;
+		var idcard = pre17to18(pre17);
+
+		document.getElementById('id-holder').value = idcard; // 将idcard放到页面上
+		copyToClipboard(idcard); // 复制idcard到剪贴板
+		reverseIDCard(idcard); // 对身份证号进行逆向解析，设置对应的参数
+	}
+	function fnFold() {
+		$('#spanFold').hide(500, null);
+		$('#info').hide(500, null);
+		$('#spanUnfold').show(500, null);
+	}
+	function fnUnfold() {
+		$('#spanUnfold').hide(500, null);
+		$('#spanFold').show(500, null);
+		$('#info').show(500, null);
+	}
+</script>
+</body>
+</html>

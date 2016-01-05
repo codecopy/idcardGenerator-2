@@ -1,0 +1,27 @@
+{
+  "name": "idcard-generator-electron",
+  "version": "2.0.0",
+  "description": "An idcard generator app, an Electron application",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zuzhi/hellojavascript.git"
+  },
+  "keywords": [
+    "Electron",
+    "idcard",
+    "generator"
+  ],
+  "author": "GitHub",
+  "license": "CC0-1.0",
+  "bugs": {
+    "url": "https://github.com/zuzhi/hellojavascript/issues"
+  },
+  "homepage": "https://github.com/zuzhi/hellojavascript",
+  "devDependencies": {
+    "electron-prebuilt": "^0.36.0"
+  }
+}
