@@ -1,0 +1,42 @@
+<div class="container alert alert-info col-sm-12">
+    <div class="col-sm-offset-3 col-sm-6">
+        <div class="page-header">
+            <h1 class="text-center">idcardGenerator</h1>
+            <p class="text-center"><strong>身份证号生成器</strong> <span class="label label-primary">v1.5.1</span></p>
+        </div>
+        <p><strong style="color:red">仅供测试使用，切勿用于非法活动，否则后果自负！</strong></p>
+    </div>
+</div>
+
+
+<p>提示[Q] <span id="spanUnfold" class="glyphicon glyphicon-menu-right" onclick="fnUnfold()"></span><span id="spanFold" style="display: none" class="glyphicon glyphicon-menu-down" onclick="fnFold()"></span><br></p>
+<div id="info" style="display: none">
+    <p class="bg-info"><strong>浏览器支持：</strong><br></p>
+    <ul class="list-inline">
+        <li>
+            <img src="./image/chrome.png" height="32" width="32" alt="Chrome logo">
+            <p>Chrome 42+</p>
+        </li>
+        <li>
+            <img src="./image/firefox.png" height="32" width="32" alt="Firefox logo">
+            <p>Firefox 41+</p>
+        </li>
+        <li>
+            <img src="./image/ie.png" height="32" width="32" alt="IE logo">
+            <p>IE 9+</p>
+        </li>
+        <li>
+            <img src="./image/safari.png" height="32" width="32" alt="Safari logo">
+            <p>Safari ✘</p>
+        </li>
+    </ul>
+    <p class="bg-info"><strong>可用的快捷键：</strong><br></p>
+    <dl class="dl-horizontal">
+        <dt><kbd>alt + g</kbd></dt>
+        <dd>根据页面选中的各参数生成身份证号，即【生成】</dd>
+        <dt><kbd>alt + r</kbd></dt>
+        <dd>根据页面上所有值随机生成身份证号，即【随机生成】</dd>
+        <dt><kbd>alt + q</kbd></dt>
+        <dd>显示/隐藏提示</dd>
+    </dl>
+</div>
