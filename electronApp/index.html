@@ -106,7 +106,7 @@
 		</div>
 		<div class="form-group hidden">
 			<div class="col-sm-offset-3 col-sm-3">
-				<input class="btn btn-primary" type="button" name="submit" value="生成" onclick="fnGenerate()"> <strong>Or</strong> 
+				<input class="btn btn-primary" type="button" name="submit" value="生成" onclick="fnGenerate()"> <strong>Or</strong>
 				<input class="btn btn-success" type="button" name="submit" value="随机生成" onclick="fnGenerateRandom()">
 			</div>
 		</div>
@@ -130,7 +130,7 @@
 					<input type="text" class="form-control" id="id-holder" placeholder="idcard...">
 					<span class="input-group-btn">
 						<button id="icon-btnCopy" class="btn btn-default" type="button" data-toggle="tooltip" data-placement="bottom" title="复制到剪贴板" data-clipboard-target="#id-holder"><span class="glyphicon glyphicon-copy"></span></button>
-                        <button id="icon-btnReverse" class="btn btn-default" type="button" data-toggle="tooltip" data-placement="bottom" title="反向查询"><span class="glyphicon glyphicon-chevron-left"></span></button>
+            <button id="icon-btnReverse" class="btn btn-default" type="button" data-toggle="tooltip" data-placement="bottom" title="反向查询"><span class="glyphicon glyphicon-chevron-left"></span></button>
 					</span>
 				</div>
 				<h3 id="holder" class="text-center"></h3>
@@ -242,7 +242,7 @@
             // 还原tooltip的title
             // $('#icon-btnCopy').attr('data-original-title', '复制到剪贴板')
             //                   .tooltip('fixTitle');
-            
+
             // 直接更新tooltip的title，无需隐藏再显示
             $('#icon-btnCopy').attr('title', '复制到剪贴板')
                               .tooltip('fixTitle')
@@ -295,7 +295,7 @@
 		var index_month = month.selectedIndex; // 选中索引
 		var value_month = month.options[index_month].value; // 选中值（月份）
 		// var text_month = month.options[index_month].text;   // 选中文本
-		
+
 		var day = document.getElementById('day'); // select对象，day
 		day.options.length = 0; // 删除所有选项option
 		// 设置号数select

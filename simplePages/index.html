@@ -104,7 +104,7 @@
 		</div>
 		<div class="form-group hidden">
 			<div class="col-sm-offset-3 col-sm-3">
-				<input class="btn btn-primary" type="button" name="submit" value="生成" onclick="fnGenerate()"> <strong>Or</strong> 
+				<input class="btn btn-primary" type="button" name="submit" value="生成" onclick="fnGenerate()"> <strong>Or</strong>
 				<input class="btn btn-success" type="button" name="submit" value="随机生成" onclick="fnGenerateRandom()">
 			</div>
 		</div>
@@ -128,6 +128,7 @@
 					<input type="text" class="form-control" id="id-holder" placeholder="idcard...">
 					<span class="input-group-btn">
 						<button id="icon-btnCopy" class="btn btn-default" type="button" data-toggle="tooltip" data-placement="bottom" title="复制到剪贴板" data-clipboard-target="#id-holder"><span class="glyphicon glyphicon-copy"></span></button>
+						<button id="icon-btnReverse" class="btn btn-default" type="button" data-toggle="tooltip" data-placement="bottom" onclick="fnReverse()" title="反向查询"><span class="glyphicon glyphicon-chevron-left"></span></button>
 					</span>
 				</div>
 				<h3 id="holder" class="text-center"></h3>
@@ -236,7 +237,7 @@
             // 还原tooltip的title
             // $('#icon-btnCopy').attr('data-original-title', '复制到剪贴板')
             //                   .tooltip('fixTitle');
-            
+
             // 直接更新tooltip的title，无需隐藏再显示
             $('#icon-btnCopy').attr('title', '复制到剪贴板')
                               .tooltip('fixTitle')
@@ -289,7 +290,7 @@
 		var index_month = month.selectedIndex; // 选中索引
 		var value_month = month.options[index_month].value; // 选中值（月份）
 		// var text_month = month.options[index_month].text;   // 选中文本
-		
+
 		var day = document.getElementById('day'); // select对象，day
 		day.options.length = 0; // 删除所有选项option
 		// 设置号数select
@@ -530,6 +531,51 @@
 		copyToClipboard(idcard); // 复制idcard到剪贴板
 		reverseIDCard(idcard); // 对身份证号进行逆向解析，设置对应的参数
 	}
+
+	// 反向查询
+	function fnReverse() {
+		// 获取身份证号码
+		var idcard = document.getElementById('id-holder').value;
+		console.info("id-holder: " + idcard);
+
+		// 校验是否合法
+		if (idcard.length !== 18) { // 身份证号不为18位
+			return;
+		}
+		var divisionCode = idcard.slice(0, 6);
+		if (countyArray.map(function (element) {return element.indexOf(divisionCode);}).every(function (element) {return element === -1})) { // 没有匹配的行政区划码
+			console.error("wrong divisionCode");
+			return;
+		}
+		var birthDateCode = idcard.slice(6, 14);
+		var year = birthDateCode.slice(0, 4);
+		if (year < 1916 || year > 2016) { // 超出年限范围
+			console.error("wrong year, must between 1916 and 2016");
+			return;
+		}
+		var month = birthDateCode.slice(4, 6);
+		if (month < 1 || month > 12) { // 超出月份范围
+			console.error("wrong month");
+			return;
+		}
+		var day = birthDateCode.slice(-2);
+		var dayDue = daysOf(year, month);
+		if (day < 1 || day > dayDue) { // 超出日期范围
+			console.error("wrong day");
+			return;
+		}
+		// var sequenceCode = idcard.slice(14, 16);
+		// var verifyCode = idcard.slice(-1);
+		var pre17 = idcard.slice(0, -1);
+		var idcardByPre17 = pre17to18(pre17);
+		if (idcard !== idcardByPre17) { // 由前十七位计算出来的第18为校验码不对
+			console.error("wrong verifyCode");
+			return;
+		}
+		reverseIDCard(idcard);
+		console.info("done");
+	}
+
 	function fnFold() {
 		$('#spanFold').hide(500, null);
 		$('#info').hide(500, null);
